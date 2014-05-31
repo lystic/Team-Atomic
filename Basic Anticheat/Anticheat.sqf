@@ -85,7 +85,7 @@ if(isDedicated) then {
 			_text = loadFile _x;
 			_numLetters = count(toArray(_text));
 			if(_numLetters > 0) exitWith {
-				[[_name,_uid,format["Bad Script: %1",_x],"Notify_Kick",false,false] call AH_fnc_MP;
+				[[_name,_uid,format["Bad Script: %1",_x]],"Notify_Kick",false,false] call AH_fnc_MP;
 				call Kick;
 			};
 		} foreach (_this select 0);
@@ -94,7 +94,7 @@ if(isDedicated) then {
 		{
 			_x spawn {
 				waitUntil{!isNil _this};
-				[[_name,_uid,format["Bad Variable: %1",_this],"Notify_Kick",false,false] call AH_fnc_MP;
+				[[_name,_uid,format["Bad Variable: %1",_this]],"Notify_Kick",false,false] call AH_fnc_MP;
 				call Kick;
 			};
 		} forEach (_this select 0);
