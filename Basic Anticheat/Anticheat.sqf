@@ -14,7 +14,7 @@ _Admins = ["01234567891234567"]; 			//Add your admin UID here
 _Use_Life_fnc_MP = false;					//If you are using altis life change this to true
 
 //Add new cheat files & variables & menus to these lists
-_DetectedFiles = ["JM3.sqf","JM3.png","wookie.sqf","wookie_wuat\start.sqf","lystoarma3\start.sqf","hack.sqf","cheat.sqf","JxMxE.sqf","JME.sqf","wookiev5.sqf","menu.sqf"];			
+_DetectedFiles = ["JM3.sqf","JM3.png","wookie.sqf","wookie_wuat\start.sqf","lystoarma3\start.sqf","help.sqf","hack.sqf","cheat.sqf","JxMxE.sqf","JME.sqf","wookiev5.sqf","menu.sqf"];			
 _DetectedVariables = ["ESP","Wookie","Extasy","GOD","GodMode","JxMxE_Exec","Lystic","Hack","Script","Wookie_Exec","Bypass"];
 _DetectedMenus = [3030];
 /* End Configuration */
@@ -39,7 +39,9 @@ BIS_fnc_MPExec = compileFinal ([BIS_fnc_MPExec] call _toCompilableString);
 
 //Protect AH_fnc_MP
 if(_Use_Life_fnc_MP) then {
+	Life_fnc_MP = compileFinal ([Life_fnc_MP] call _toCompilableString);
 	AH_fnc_MP = compileFinal ([Life_fnc_MP] call _toCompilableString);
+	life_fnc_tazed = compileFinal ([life_fnc_tazed] call _toCompilableString);
 } else {
 	AH_fnc_MP = compileFinal ([BIS_fnc_MP] call _toCompilableString);
 };
@@ -60,6 +62,17 @@ if(isDedicated) then {
 	Notify_Load = compileFinal '
 		diag_log format["<ANTICHEAT> %1",_this];
 	';
+
+	[] spawn {
+		while{true} do {
+			{
+				_x hideObjectGlobal false;
+			} forEach playableUnits;
+			_time = time + 2;
+			waitUntil{time >= _time};
+		};
+	};	
+
 } else {
 	waitUntil{!isnull player};
 	waitUntil{alive player};
@@ -73,6 +86,7 @@ if(isDedicated) then {
 	};		
 
 	Kick = compileFinal "
+		endMission 'FAIL';
 		for '_i' from 0 to 100 do {(findDisplay _i) closeDisplay 0;};
 		disableUserInput true;
 	";
@@ -122,7 +136,18 @@ if(isDedicated) then {
 			};
 			_time = time + 5;
 			setTerrainGrid 25;
+			_nearObjects = vehicle player nearObjects 50;
+			{
+				vehicle player enableCollisionWith _x;
+			} forEach _nearObjects;
 			waitUntil{time >= _time};
+		};
+	};
+	[] spawn {
+		while{true} do {
+			onMapSingleClick '';
+			player allowDamage true;
+			vehicle player allowDamage true;
 		};
 	};
 	[[format["The Player %1 Has Initialized",name player]],"Notify_Load",false,false] call AH_fnc_MP; 
