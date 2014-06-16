@@ -49,13 +49,8 @@ if(_Use_Life_fnc_MP) then {
 if(isDedicated) then {
 	diag_log "<ANTICHEAT>: Initialized!";
 	Notify_Kick = compileFinal '
-		_name = _this select 0;
-		_uid = _this select 1;
-		_reason = _this select 2;
 		diag_log "<ANTICHEAT> Kicked User";
-		diag_log _name;
-		diag_log _uid;
-		diag_log _reason;
+		diag_log str(_this);
 		diag_log "<ANTICHEAT> End Kicked";
 		[_this,"Receive_Notify",true,false] call AH_fnc_MP;
 	';
@@ -152,3 +147,5 @@ if(isDedicated) then {
 	};
 	[[format["The Player %1 Has Initialized",name player]],"Notify_Load",false,false] call AH_fnc_MP; 
 };
+
+call compile preprocessfilelinenumbers "AdminMenu.sqf";
