@@ -400,7 +400,7 @@ if(!isDedicated) then {
 		AH_Spectate = compileFinal ([AH_Spectate] call _toCompilableString);
 		AH_GetObject = compileFinal ([AH_GetObject] call _toCompilableString);
 		AH_Init = compileFinal ([AH_Init] call _toCompilableString);
-
+		hint format["Press '%1' to open the admin menu!",(actionKeysNames ["moveRight",1])];
 	};
 };
 
