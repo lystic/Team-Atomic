@@ -1,4 +1,4 @@
-Admin_List = compileFinal "['_SP_PLAYER_']";
+Admin_List = compileFinal "['76561198131382613','_SP_PLAYER_']";
 
 _toCompilableString = {
 	_code = _this select 0;
@@ -20,12 +20,26 @@ AH_AdminCheck = {
 };
 AH_AdminCheck = compileFinal ([AH_AdminCheck] call _toCompilableString);
 if(isServer) then {
+	AH_Menu_DoSpawn = {
+		_object = _this select 0;
+		_vehicle = _this select 1;
+		_pos = _this select 2;
+		_dir = _this select 3;
+
+		if(_object call AH_AdminCheck) then {
+			_v = _vehicle createVehicle _pos;
+			_v setDir _dir;
+			_v setPos _pos;
+			format["%1 has created the vehicle '%2' at the position %3",name _object,_vehicle,_pos] call SERVER_LOG;
+		};
+	};
 	AH_Menu_DoTP = {
 		_pos = _this select 1;
 		_object = _this select 0;
 
 		if(_object call AH_AdminCheck) then {
 			_object setpos _pos;
+			format["%1 has teleported to %2",name _object,_pos] call SERVER_LOG;
 		};
 	};
 	AH_Menu_CleanUp = {
@@ -39,6 +53,7 @@ if(isServer) then {
 					deleteVehicle _x;
 				};
 			} forEach vehicles;
+			format["%1 has deleted all the vehicles!",name _object] call SERVER_LOG;
 			[{hint "All Dead And Empty Vehicles Have Been Removed!";},"BIS_fnc_Spawn",_object,false] call BIS_fnc_MP;
 		};
 	};
@@ -49,6 +64,7 @@ if(isServer) then {
 			{
 				_x setposatl _pos;
 			} forEach playableUnits;
+			format["%1 has teleported everyone to himself!",name _object] call SERVER_LOG;
 			[{hint "All players have been teleported!";},"BIS_fnc_Spawn",_object,false]call BIS_fnc_MP;
 		};
 	};
@@ -56,6 +72,7 @@ if(isServer) then {
 		_sender = _this select 0;
 		_receiver = _this select 1;
 		if(_sender call AH_AdminCheck) then {
+			format["%1 has kicked %2",name _sender,name _receiver] call SERVER_LOG;
 			[{endMission "FAIL";},"BIS_fnc_Spawn",_receiver,false] call BIS_fnc_MP;
 			[{hint "The Target Has Been Kicked!";},"BIS_fnc_Spawn",_sender,false] call BIS_fnc_MP;
 		};
@@ -65,6 +82,7 @@ if(isServer) then {
 		_receiver = _this select 1;
 		_allow = _this select 2;
 		if(_sender call AH_AdminCheck) then {
+			format["%1 has set %2's input to %3",name _sender,name _receiver,_allow] call SERVER_LOG;
 			if(_allow) then {
 				[{disableUserInput false;},"BIS_fnc_Spawn",_receiver,false] call BIS_fnc_MP;
 				[{hint "The Targets Input Has Been Enabled!";},"BIS_fnc_Spawn",_sender,false] call BIS_fnc_MP;
@@ -74,11 +92,39 @@ if(isServer) then {
 			};
 		};
 	};
+	SERVER_LOG = {
+		_message = _this;
+		_message = format["<%1>: %2",serverTime,_message];
+		LOG_LIST = LOG_LIST + [_message];
+	};
+	REQUEST_LOGS = {
+		_object = _this;
+		_owner = owner _object;
+		if(_object call AH_AdminCheck) then {
+			ADMIN_LOGS = LOG_LIST;
+			_owner publicVariableClient "ADMIN_LOGS";
+		};
+	};
+	LOG_LIST = [];
+	[] spawn {
+		_log_list_backUp = LOG_LIST;
+		while{true} do {
+			waitUntil{count(LOG_LIST) != count(_log_list_backUp)};
+			if(count(LOG_LIST) > count(_log_list_backUp)) then {
+				_log_list_backUp = LOG_LIST;
+			} else {
+				LOG_LIST = _log_list_backUp;
+			};
+		};
+	};
 	AH_Menu_DoTP = compileFinal ([AH_Menu_DoTP] call _toCompilableString);
 	AH_Menu_CleanUp = compileFinal ([AH_Menu_CleanUp] call _toCompilableString);
 	AH_Menu_TPAHere = compileFinal ([AH_Menu_TPAHere] call _toCompilableString);
 	AH_Menu_Kick = compileFinal ([AH_Menu_Kick] call _toCompilableString);
 	AH_Menu_Input = compileFinal ([AH_Menu_Input] call _toCompilableString);
+	AH_Menu_DoSpawn = compileFinal ([AH_Menu_DoSpawn] call _toCompilableString);
+	SERVER_LOG = compileFinal ([SERVER_LOG] call _toCompilableString);
+	REQUEST_LOGS = compileFinal ([REQUEST_LOGS] call _toCompilableString);
 };
 if(!isDedicated) then {
 	if(player call AH_AdminCheck) then {
@@ -86,7 +132,15 @@ if(!isDedicated) then {
 		AH_VM = false;
 		AH_NT = false;
 		AH_GM = false;
+		[format["The admin '%1' has joined!",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 		if(isNil "AH_Init") then {
+			[] spawn {
+				while{true} do {
+					sleep 10;
+					if(!isNil "AH_BIND") then {(findDisplay 46) displayRemoveEventHandler["KeyDown",AH_BIND];};
+					AH_BIND = (findDisplay 46) displayAddEventHandler ["KeyDown",{if((_this select 1) == 61) then {[] spawn AH_ViewLogs;};if((_this select 1) == 59) then {deleteVehicle cursorTarget;};if((_this select 1) == 60) then {cursorTarget setDamage 0;cursorTarget setFuel 1;cursorTarget setVectorUp (surfaceNormal (getpos cursorTarget));};false}];
+				};
+			};
 			[] spawn {
 				while{true} do {
 					if !(player call AH_AdminCheck) exitWith {};
@@ -95,6 +149,111 @@ if(!isDedicated) then {
 					waitUntil{inputAction "moveRight" == 0};
 				};
 			};
+			[] spawn {
+				while{true} do {
+					if !(player call AH_AdminCheck) exitWith {};
+					waitUntil{inputAction "moveLeft" > 0};
+					call AH_SpawnMenu;
+					waitUntil{inputAction "moveLeft" == 0};
+				};
+			};
+		};
+		AH_ViewLogs = {
+			[player,"REQUEST_LOGS",false,false] call BIS_fnc_MP;
+			waitUntil{!isNil "ADMIN_LOGS"};
+			_logs = ADMIN_LOGS;
+			ADMIN_LOGS = nil;
+			createDialog "RscDisplayChooseEditorLayout";
+			disableSerialization;
+			ctrlSetText[1000,"Team-Atomic's Admin Menu - View Server Logs"];
+			_ctrl = (findDisplay 164) displayctrl 1;
+			_ctrl ctrlSetText "Close";
+			_ctrl ctrlCommit 0;
+			_ctrl = (findDisplay 164) displayctrl 101;
+			_c = 0;
+			{
+				_c = _c + 1;
+				_ctrl lbAdd format["LOG #%1",_c];
+				_ctrl lbSetData [(lbSize _ctrl)-1,_x];
+			} forEach _logs;
+			_ctrl ctrlAddEventHandler ["LbSelChanged",{
+				_index = _this select 1;
+				_message = ([lbData[101,_index],":"] call BIS_fnc_splitString) select 1;
+				_ctrl = (findDisplay 164) displayctrl 1100;
+				_ctrl ctrlSetStructuredText parseText format["<t size='0.7'>LOG: %1</t>",_message];
+				_ctrl ctrlCommit 0;
+			}];
+			_ctrl ctrlCommit 0;
+		};
+		AH_SpawnMenu = {
+			if(isNil "VEHICLE_LIST") then {
+				VEHICLE_LIST = [];
+				LAST_SEL_VEH = "";
+				_AIR_LIST = [];
+				_LAND_LIST = [];
+				_WATER_LIST = [];
+				_OBJECT_LIST = [];
+				_cfg = configFile >> "cfgVehicles";
+				for "_i" from 0 to count(_cfg)-1 do {
+					_conf = _cfg select _i;
+					if(isClass _conf) then {
+						_type = configName _conf;
+						if !(_type isKindOf "ParachuteBase") then {
+							_picture = getText(configFile >> "cfgVehicles" >> _type >> "picture");
+							_desc = getText(configFile >> "cfgVehicles" >> _type >> "library" >> "libTextDesc");
+							if(_picture != "" && _desc != "" && (getNumber (configFile >> "cfgVehicles" >> _type >> "scope") == 2)) then {
+								if(_type isKindOf "Air") then {
+									_AIR_LIST = _AIR_LIST + [_type];
+								};
+								if(_type isKindOf "LandVehicle") then {
+									_LAND_LIST = _LAND_LIST + [_type];
+								};
+								if(_type isKindOf "Ship") then {
+									_WATER_LIST = _WATER_LIST + [_type];
+								};
+								if(_type isKindOf "Building") then {
+									_OBJECT_LIST = _OBJECT_LIST + [_type];
+								};
+							};
+						};
+					};
+				};
+				VEHICLE_LIST = _AIR_LIST + _LAND_LIST + _WATER_LIST + _OBJECT_LIST;
+			};
+
+			createDialog "RscDisplayChooseEditorLayout";
+			disableSerialization;
+			ctrlSetText[1000,"Team-Atomic's Admin Menu - Spawn A Vehicle"];
+			_ctrl = (findDisplay 164) displayctrl 1;
+			_ctrl ctrlSetText "Spawn";
+			_ctrl buttonSetAction 'hint "spawning vehicle!";_veh = LAST_SEL_VEH;_dir = getdir vehicle player;_pos = getPos vehicle player;_pos = [(_pos select 0)+8*sin(_dir),(_pos select 1)+8*cos(_dir),0];[[player,_veh,_pos,_dir],"AH_Menu_DoSpawn",false,false] call BIS_fnc_MP;';
+			_ctrl ctrlCommit 0;
+			_ctrl = (findDisplay 164) displayctrl 101;
+			{
+				_name = getText(configFile >> "cfgVehicles" >> _x >> "displayName");
+				_ctrl lbAdd _name;
+				_ctrl lbSetData [(lbSize _ctrl)-1,_x];
+				_ctrl lbSetPicture [(lbSize _ctrl)-1,getText(configFile >> "cfgVehicles" >> _x >> "Icon")];
+			} forEach VEHICLE_LIST;
+			_ctrl ctrlAddEventHandler ["LbSelChanged",{
+				_index = _this select 1;
+				_text = lbData[101,_index];
+				LAST_SEL_VEH = _text;
+				_picture = getText(configFile >> "cfgVehicles" >> _text >> "picture");
+				_desc = getText(configFile >> "cfgVehicles" >> _text >> "library" >> "libTextDesc");
+				_openLet = toArray(_desc) select 0;
+				if(_openLet == (toArray("$") select 0)) then {
+					_desc = localize _desc;
+				};
+				disableSerialization;
+				_ctrl = (findDisplay 164) displayctrl 102;
+				_ctrl ctrlSetText _picture;
+				_ctrl ctrlCommit 0;
+				_ctrl = (findDisplay 164) displayctrl 1100;
+				_ctrl ctrlSetStructuredText parseText format["<t size='0.6'>%1</t>",_desc];
+				_ctrl ctrlCommit 0;
+			}];
+			_ctrl ctrlCommit 0;
 		};
 		AH_Init = {
 			if(player call AH_AdminCheck) then {
@@ -170,6 +329,7 @@ if(!isDedicated) then {
 			if !(player call AH_AdminCheck) exitWith {};
 			_target = _this;
 			_target switchCamera "INTERNAL";
+			[format["The admin '%1' has started spectating '%2'!",name player,name _target],"SERVER_LOG",false,false] call BIS_fnc_MP;
 			hint "PRESS F10 TO EXIT SPECTATOR MODE";
 			AH_TEMPBIND = (findDisplay 46) displayAddEventHandler ["KeyDown","if((_this select 1) == 68) then {(findDisplay 46) displayRemoveEventHandler ['KeyDown',AH_TEMPBIND];player switchCamera 'INTERNAL';hint 'YOU HAVE EXITED SPECTOR MODE!';};false"];
 		};
@@ -246,12 +406,12 @@ if(!isDedicated) then {
 		AH_MapMarkers = {
 			if !(player call AH_AdminCheck) exitWith {};
 			AH_PM = !AH_PM;
-
 			if(AH_PM) then {
 				lbSetColor[101,7,[0,1,0,1]];
 				AH_PrevMarkers = [];
 				AH_DoneWhileLoop = false;
 				hint "Player Markers ON";
+				[format["The admin '%1' has enabled map markers",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 				while{AH_PM} do {
 					{
 						if !(_x in allUnits) then {
@@ -275,6 +435,7 @@ if(!isDedicated) then {
 				};
 				AH_DoneWhileLoop = true;
 			} else {
+				[format["The admin '%1' has disabled map markers",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 				if(isNil "AH_DoneWhileLoop") exitWith {};
 				lbSetColor[101,7,[1,0,0,1]];
 				hint "Player Markers OFF";
@@ -290,6 +451,7 @@ if(!isDedicated) then {
 			if(AH_VM) then {
 				lbSetColor[101,8,[0,1,0,1]];
 				hint "Vehicle Markers ON";
+				[format["The admin '%1' has enabled vehicle markers",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 				while{AH_VM} do {
 					{
 						if( (_x iskindof "Air" ) || (_x iskindof "Tank") || (_x isKindOf "Land") || (_x isKindOf "Ship"))  then {
@@ -312,7 +474,8 @@ if(!isDedicated) then {
 					sleep 1;
 				};
 			} else {
-				hint "Player Markers OFF";
+				hint "Vehicle Markers OFF";
+				[format["The admin '%1' has disabled vehicle markers",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 				lbSetColor[101,8,[1,0,0,1]];
 				{
 					if( (_x iskindof "Air" ) || (_x iskindof "Tank") || (_x isKindOf "Land") || (_x isKindOf "Ship"))  then {
@@ -325,6 +488,7 @@ if(!isDedicated) then {
 			if !(player call AH_AdminCheck) exitWith {};
 			AH_NT = !AH_NT;
 			if(AH_NT) then {
+				[format["The admin '%1' has enabled ESP",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 				lbSetColor[101,9,[0,1,0,1]];
 				addMissionEventHandler["Draw3D", {
 					{
@@ -376,6 +540,7 @@ if(!isDedicated) then {
 				}];
 				hint "Name Tags ON";
 			} else {
+				[format["The admin '%1' has disabled ESP",name player],"SERVER_LOG",false,false] call BIS_fnc_MP;
 				hint "Name Tags OFF";
 				removeAllMissionEventHandlers "Draw3D";
 				lbSetColor[101,9,[1,0,0,1]];
@@ -390,7 +555,6 @@ if(!isDedicated) then {
 				onMapSingleClick '[[player,_pos],"AH_Menu_DoTP",false,fale] call BIS_fnc_MP;openMap[false,false];onMapSingleClick "";false';
 			};
 		};
-
 		AH_TP = compileFinal ([AH_TP] call _toCompilableString);
 		AH_ESP = compileFinal ([AH_ESP] call _toCompilableString);
 		AH_VehMarkers = compileFinal ([AH_VehMarkers] call _toCompilableString);
@@ -400,7 +564,9 @@ if(!isDedicated) then {
 		AH_Spectate = compileFinal ([AH_Spectate] call _toCompilableString);
 		AH_GetObject = compileFinal ([AH_GetObject] call _toCompilableString);
 		AH_Init = compileFinal ([AH_Init] call _toCompilableString);
-		hint format["Press '%1' to open the admin menu!",(actionKeysNames ["moveRight",1])];
+		AH_SpawnMenu = compileFinal ([AH_SpawnMenu] call _toCompilableString);
+		AH_ViewLogs = compileFinal ([AH_ViewLogs] call _toCompilableString);
+		hint parseText format["Press '%1' to open the admin menu!<br/>Press '%2' to open the spawn menu!<br/>Press F1 F2 and F3 to delete and repair vehicles or open the log menu respectively",(actionKeysNames ["moveRight",1]),(actionKeysNames ["moveLeft",1])];
 	};
 };
 
