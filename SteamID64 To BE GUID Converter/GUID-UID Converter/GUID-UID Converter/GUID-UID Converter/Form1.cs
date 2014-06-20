@@ -22,7 +22,7 @@ namespace GUID_UID_Converter
         {
             if (textBox1.Text.Length == 17)
             {
-                textBox2.Text = toGUID(Convert.ToInt64(textBox1.Text));
+                textBox2.Text = toGUID(Convert.ToInt64(textBox1.Text)).ToLower();
             }
         }
         private string toGUID(long UID)
