@@ -1,3 +1,0 @@
-- Place ANTiCHEAT.sqf in your mission root
-- PLace AdminMenu.sqf in your mission root
-- Add ([] execVM "ANTICHEAT.sqf";) into your missions init.sqf
