@@ -148,4 +148,7 @@ if(isDedicated) then {
 	[[format["The Player %1 Has Initialized",name player]],"Notify_Load",false,false] call AH_fnc_MP; 
 };
 
-call compile preprocessfilelinenumbers "AdminMenu.sqf";
+_exists = loadFile "AdminMenu.sqf"
+if(_exists != "") then {
+	call compile preprocessfilelinenumbers "AdminMenu.sqf";
+};
