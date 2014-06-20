@@ -410,10 +410,30 @@ if(!isDedicated) then {
 				case 3: {3 spawn AH_Target;};
 				case 4: {if(player call AH_AdminCheck) then {[player,"AH_Menu_CleanUp",false,false] call AH_fnc_MP;};};
 				case 5: {if(player call AH_AdminCheck) then {[player,"AH_Menu_TPAHere",false,false] call AH_fnc_MP;};};
-				case 6: {if(player call AH_AdminCheck) then {AH_GM = !AH_GM; if(AH_GM) then {lbSetColor[101,6,[0,1,0,1]];player allowDamage false;hint "God Mode ON";} else {lbSetColor[101,6,[1,0,0,1]];player allowDamage true;hint "God Mode OFF";};};};
+				case 6: {if(player call AH_AdminCheck) then {AH_GM = !AH_GM; if(AH_GM) then {lbSetColor[101,6,[0,1,0,1]];player allowDamage false;[] spawn AH_CarGod;hint "God Mode ON";} else {lbSetColor[101,6,[1,0,0,1]];player allowDamage true;[] spawn AH_CarGod;hint "God Mode OFF";};};};
 				case 7: {[] spawn AH_MapMarkers;};
 				case 8: {[] spawn AH_VehMarkers;};
 				case 9: {call AH_ESP;};
+			};
+		};
+		AH_CarGod = {
+			if !(player call AH_AdminCheck) exitWith {};
+			if(AH_GM) then {
+				while{AH_GM} do {
+					_oldVeh = vehicle player;
+					_oldVeh allowDamage false;
+					_oldVeh setFuel 1;
+					_oldVeh setDamage 0;
+					waitUntil{_oldVeh != (vehicle player)};
+					if(_oldVeh != player) then {
+						_oldVeh allowDamage true;
+						_oldVeh = vehicle player;
+					};
+				};
+			} else {
+				if(vehicle player != player) then {
+					vehicle player allowDamage true;
+				};
 			};
 		};
 		AH_MapMarkers = {
@@ -570,6 +590,7 @@ if(!isDedicated) then {
 		};
 		AH_TP = compileFinal ([AH_TP] call _toCompilableString);
 		AH_ESP = compileFinal ([AH_ESP] call _toCompilableString);
+		AH_CarGod = compileFinal ([AH_CarGod] call _toCompilableString);
 		AH_VehMarkers = compileFinal ([AH_VehMarkers] call _toCompilableString);
 		AH_MapMarkers = compileFinal ([AH_MapMarkers] call _toCompilableString);
 		AH_DBLClick = compileFinal ([AH_DBLClick] call _toCompilableString);

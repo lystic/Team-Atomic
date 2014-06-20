@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUID-UID Converter", "GUID-UID Converter\GUID-UID Converter.csproj", "{6353A037-4761-4BA1-BCB9-ABAF381F765C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6353A037-4761-4BA1-BCB9-ABAF381F765C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6353A037-4761-4BA1-BCB9-ABAF381F765C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6353A037-4761-4BA1-BCB9-ABAF381F765C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6353A037-4761-4BA1-BCB9-ABAF381F765C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
