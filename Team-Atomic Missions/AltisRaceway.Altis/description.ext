@@ -1,0 +1,19 @@
+author = "Team Atomic";
+onLoadName = "Altis Raceway 1.0";
+onLoadMission = "Race Karts around Altis!";
+joinUnassigned = 1;
+respawn = BASE;	
+respawndelay = 10;
+enableDebugConsole = 1;
+disabledAI = true;
+allowFunctionsRecompile = 1;
+onPauseScript = "Clients\onPause.sqf";
+
+class Header
+{
+	gameType = RPG;
+	minPlayers = 1;
+	maxPlayers = 4;
+};
+
+#include "Dialogs\RscDisplayFinishPositions.hpp"
