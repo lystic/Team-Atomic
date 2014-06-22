@@ -10,6 +10,8 @@
   /* Configuration */
 
 Admin_List = compileFinal "['76561198131382613','_SP_PLAYER_']";		//replace these with your admin player UIDS (steamID64)
+_moveRight = actionKeysNames "TurnRight";
+_moveLeft = actionKeysNames "TurnLeft";
 
 /* End Configuration */
 
@@ -157,17 +159,17 @@ if(!isDedicated) then {
 			[] spawn {
 				while{true} do {
 					if !(player call AH_AdminCheck) exitWith {};
-					waitUntil{inputAction "moveRight" > 0};
+					waitUntil{inputAction "TurnRight" > 0};
 					call AH_Init;
-					waitUntil{inputAction "moveRight" == 0};
+					waitUntil{inputAction "TurnRight" == 0};
 				};
 			};
 			[] spawn {
 				while{true} do {
 					if !(player call AH_AdminCheck) exitWith {};
-					waitUntil{inputAction "moveLeft" > 0};
+					waitUntil{inputAction "TurnLeft" > 0};
 					call AH_SpawnMenu;
-					waitUntil{inputAction "moveLeft" == 0};
+					waitUntil{inputAction "TurnLeft" == 0};
 				};
 			};
 		};
@@ -600,8 +602,6 @@ if(!isDedicated) then {
 		AH_Init = compileFinal ([AH_Init] call _toCompilableString);
 		AH_SpawnMenu = compileFinal ([AH_SpawnMenu] call _toCompilableString);
 		AH_ViewLogs = compileFinal ([AH_ViewLogs] call _toCompilableString);
-		hint parseText format["Press '%1' to open the admin menu!<br/>Press '%2' to open the spawn menu!<br/>Press F1 F2 and F3 to delete and repair vehicles or open the log menu respectively",(actionKeysNames ["moveRight",1]),(actionKeysNames ["moveLeft",1])];
+		hint parseText format["Press '%1' to open the admin menu!<br/>Press '%2' to open the spawn menu!<br/>Press F1 F2 and F3 to delete and repair vehicles or open the log menu respectively", _moveRight, _moveLeft];
 	};
 };
-
-
