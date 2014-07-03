@@ -72,6 +72,16 @@ if(isServer) then {
 			format["%1 has teleported to %2",name _object,_pos] call SERVER_LOG;
 		};
 	};
+	AH_TP_Here = {
+		_admin = _this select 0;
+		_target = _this select 1;
+
+		if(_object call AH_AdminCheck) then {
+			_target setpos (getpos _admin);
+			format["%1 has teleported to %2",name _target,name _admin] call SERVER_LOG;
+			[{hint "The target has been teleported!";},"BIS_fnc_Spawn",_admin,false] call AH_fnc_MP;
+		};
+	};
 	AH_Menu_CleanUp = {
 		_object = _this;
 		if(_object call AH_AdminCheck) then {
@@ -285,6 +295,11 @@ if(!isDedicated) then {
 			}];
 			_ctrl ctrlCommit 0;
 		};
+		AH_AreYouSure = {
+			_question = _this select 0;
+			_responce = [_question, "Team-Atomic Admin Menu", "Yes", "No"] call BIS_fnc_guiMessage;
+			_responce
+		};
 		AH_Init = {
 			if(player call AH_AdminCheck) then {
 				if(isNull (FindDisplay 163)) then {
@@ -409,6 +424,16 @@ if(!isDedicated) then {
 				_ctrl buttonSetAction "[[player,(lbText[101,lbCurSel 101] call AH_GetObject),true],'AH_Menu_Input',false,false] call AH_fnc_MP";
 				_ctrl ctrlCommit 0;
 			};
+			if(_script == 4) then {
+				_ctrl = (findDisplay 164) displayctrl 1100;
+				_ctrl ctrlSetStructuredText parseText "<t size='1.1'>Teleport Here</t><br/><t size='0.9'>Teleport the selected player to you!</t>";
+				_ctrl ctrlCommit 0;
+
+				_ctrl = (findDisplay 164) displayctrl 1;
+				_ctrl ctrlSetText "Teleport Here";
+				_ctrl buttonSetAction "[[player,(lbText[101,lbCurSel 101] call AH_GetObject)],'AH_TP_Here',false,false] call AH_fnc_MP";
+				_ctrl ctrlCommit 0;
+			};
 			_ctrl = (findDisplay 164) displayctrl 101;
 			{
 				if(alive _x && isplayer _x) then {
@@ -425,8 +450,8 @@ if(!isDedicated) then {
 				case 1: {1 spawn AH_Target;};
 				case 2: {2 spawn AH_Target;};
 				case 3: {3 spawn AH_Target;};
-				case 4: {if(player call AH_AdminCheck) then {[player,"AH_Menu_CleanUp",false,false] call AH_fnc_MP;};};
-				case 5: {if(player call AH_AdminCheck) then {[player,"AH_Menu_TPAHere",false,false] call AH_fnc_MP;};};
+				case 4: {if(player call AH_AdminCheck) then {_sure = ["Are you sure you would like to delete all vehicles?"] call AH_AreYouSure;if(_sure) then {[player,"AH_Menu_CleanUp",false,false] call AH_fnc_MP;};};};
+				case 5: {4 spawn AH_Target;};
 				case 6: {if(player call AH_AdminCheck) then {AH_GM = !AH_GM; if(AH_GM) then {lbSetColor[101,6,[0,1,0,1]];player allowDamage false;[] spawn AH_CarGod;hint "God Mode ON";} else {lbSetColor[101,6,[1,0,0,1]];player allowDamage true;[] spawn AH_CarGod;hint "God Mode OFF";};};};
 				case 7: {[] spawn AH_MapMarkers;};
 				case 8: {[] spawn AH_VehMarkers;};
