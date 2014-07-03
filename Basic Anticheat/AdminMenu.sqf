@@ -158,6 +158,7 @@ if(isServer) then {
 		};
 	};
 	AH_Menu_DoTP = compileFinal ([AH_Menu_DoTP] call _toCompilableString);
+	AH_TP_Here = compileFinal ([AH_TP_Here] call _toCompilableString);
 	AH_Menu_CleanUp = compileFinal ([AH_Menu_CleanUp] call _toCompilableString);
 	AH_Menu_TPAHere = compileFinal ([AH_Menu_TPAHere] call _toCompilableString);
 	AH_Menu_Kick = compileFinal ([AH_Menu_Kick] call _toCompilableString);
@@ -450,7 +451,7 @@ if(!isDedicated) then {
 				case 1: {1 spawn AH_Target;};
 				case 2: {2 spawn AH_Target;};
 				case 3: {3 spawn AH_Target;};
-				case 4: {if(player call AH_AdminCheck) then {_sure = ["Are you sure you would like to delete all vehicles?"] call AH_AreYouSure;if(_sure) then {[player,"AH_Menu_CleanUp",false,false] call AH_fnc_MP;};};};
+				case 4: {[] spawn {if(player call AH_AdminCheck) then {_sure = ["Are you sure you would like to delete all vehicles?"] call AH_AreYouSure;if(_sure) then {[player,"AH_Menu_CleanUp",false,false] call AH_fnc_MP;};};};};
 				case 5: {4 spawn AH_Target;};
 				case 6: {if(player call AH_AdminCheck) then {AH_GM = !AH_GM; if(AH_GM) then {lbSetColor[101,6,[0,1,0,1]];player allowDamage false;[] spawn AH_CarGod;hint "God Mode ON";} else {lbSetColor[101,6,[1,0,0,1]];player allowDamage true;[] spawn AH_CarGod;hint "God Mode OFF";};};};
 				case 7: {[] spawn AH_MapMarkers;};
@@ -640,6 +641,7 @@ if(!isDedicated) then {
 		AH_Spectate = compileFinal ([AH_Spectate] call _toCompilableString);
 		AH_GetObject = compileFinal ([AH_GetObject] call _toCompilableString);
 		AH_Init = compileFinal ([AH_Init] call _toCompilableString);
+		AH_AreYouSure = compileFinal ([AH_AreYouSure] call _toCompilableString);
 		AH_SpawnMenu = compileFinal ([AH_SpawnMenu] call _toCompilableString);
 		AH_ViewLogs = compileFinal ([AH_ViewLogs] call _toCompilableString);
 		hint parseText format["Press '%1' to open the admin menu!<br/>Press '%2' to open the spawn menu!<br/>Press F1 F2 and F3 to delete and repair vehicles or open the log menu respectively",(actionKeysNames ["moveRight",1]),(actionKeysNames ["moveLeft",1])];
