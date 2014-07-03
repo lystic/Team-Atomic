@@ -76,7 +76,7 @@ if(isServer) then {
 		_admin = _this select 0;
 		_target = _this select 1;
 
-		if(_object call AH_AdminCheck) then {
+		if(_admin call AH_AdminCheck) then {
 			_target setpos (getpos _admin);
 			format["%1 has teleported to %2",name _target,name _admin] call SERVER_LOG;
 			[{hint "The target has been teleported!";},"BIS_fnc_Spawn",_admin,false] call AH_fnc_MP;
@@ -331,7 +331,7 @@ if(!isDedicated) then {
 					_ctrl lbAdd "Disable Input";
 					_ctrl lbAdd "Enable Input";
 					_ctrl lbAdd "Cleanup Vehicles";
-					_ctrl lbAdd "Teleport All Here";
+					_ctrl lbAdd "Teleport Here";
 					_ctrl lbAdd "God Mode";
 					if(AH_GM) then {
 						_ctrl lbSetColor [6,[0,1,0,1]];
